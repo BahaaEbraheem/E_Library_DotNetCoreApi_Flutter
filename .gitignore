@@ -1,0 +1,20 @@
+# .NET Core
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.packages
+.pub/
+.pub-cache/
