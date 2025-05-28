@@ -1,6 +1,0 @@
-[
-  {
-    "key": "f12",
-    "command": "editor.action.peekDefinition"
-  }
-]
