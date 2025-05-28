@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace E_Library.API.Filters;
+namespace e_library_backend.Filters;
 
 public class ValidationFilter<T> : IEndpointFilter where T : class
 {
@@ -15,7 +15,7 @@ public class ValidationFilter<T> : IEndpointFilter where T : class
 
         var validationContext = new ValidationContext(parameter);
         var validationResults = new List<ValidationResult>();
-        
+
         if (!Validator.TryValidateObject(parameter, validationContext, validationResults, true))
         {
             var errors = validationResults
@@ -24,7 +24,7 @@ public class ValidationFilter<T> : IEndpointFilter where T : class
                     g => g.Key,
                     g => g.Select(r => r.ErrorMessage ?? "Invalid value").ToArray()
                 );
-                
+
             return Results.ValidationProblem(errors);
         }
 

@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 
-namespace E_Library.API.Filters;
+namespace e_library_backend.Filters;
 
 public class AdminAuthFilter : IEndpointFilter
 {

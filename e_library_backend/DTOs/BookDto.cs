@@ -1,4 +1,4 @@
-namespace E_Library.API.DTOs;
+namespace e_library_backend.DTOs;
 
 public class BookDto
 {

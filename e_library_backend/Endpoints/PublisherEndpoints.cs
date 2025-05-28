@@ -1,15 +1,15 @@
-using E_Library.API.Filters;
-using E_Library.API.Models;
-using E_Library.API.Repositories;
+using e_library_backend.Filters;
+using e_library_backend.Models;
+using e_library_backend.Repositories;
 
-namespace E_Library.API.Endpoints;
+namespace e_library_backend.Endpoints;
 
 public static class PublisherEndpoints
 {
     public static void MapPublisherEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api");
-        
+
         // Get all publishers
         group.MapGet("/publishers", async (IPublisherRepository publisherRepository) =>
             await publisherRepository.GetAllPublishersAsync());

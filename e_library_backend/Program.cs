@@ -1,10 +1,10 @@
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
-using E_Library.API.Data;
-using E_Library.API.Endpoints;
-using E_Library.API.Repositories;
-using E_Library.API.Services;
+using e_library_backend.Data;
+using e_library_backend.Endpoints;
+using e_library_backend.Repositories;
+using e_library_backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add database context
-builder.Services.AddDbContext<LibraryDbContext>(options => 
+builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services

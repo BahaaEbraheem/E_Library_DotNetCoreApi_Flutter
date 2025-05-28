@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace E_Library.API.Migrations
+namespace e_library_backend.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

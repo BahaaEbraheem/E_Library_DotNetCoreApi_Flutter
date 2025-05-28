@@ -1,6 +1,6 @@
-using E_Library.API.Models;
+using e_library_backend.Models;
 
-namespace E_Library.API.Repositories;
+namespace e_library_backend.Repositories;
 
 public interface IAuthorRepository
 {

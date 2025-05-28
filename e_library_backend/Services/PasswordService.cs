@@ -1,4 +1,4 @@
-namespace E_Library.API.Services;
+namespace e_library_backend.Services;
 
 public class PasswordService : IPasswordService
 {

@@ -1,4 +1,4 @@
-namespace E_Library.API.Models;
+namespace e_library_backend.Models;
 
 public class User
 {

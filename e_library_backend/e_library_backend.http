@@ -1,6 +1,6 @@
-@E_Library.API_HostAddress = http://localhost:5298
+@e_library_backend_HostAddress = http://localhost:5298
 
-GET {{E_Library.API_HostAddress}}/weatherforecast/
+GET {{e_library_backend_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

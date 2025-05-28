@@ -1,6 +1,6 @@
-using E_Library.API.DTOs;
+using e_library_backend.DTOs;
 
-namespace E_Library.API.Services;
+namespace e_library_backend.Services;
 
 public interface IAuthService
 {

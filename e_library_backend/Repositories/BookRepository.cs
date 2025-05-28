@@ -1,9 +1,9 @@
-using E_Library.API.Data;
-using E_Library.API.DTOs;
-using E_Library.API.Models;
+using e_library_backend.Data;
+using e_library_backend.DTOs;
+using e_library_backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace E_Library.API.Repositories;
+namespace e_library_backend.Repositories;
 
 public class BookRepository : IBookRepository
 {
@@ -20,7 +20,7 @@ public class BookRepository : IBookRepository
             .Include(b => b.Author)
             .Include(b => b.Publisher)
             .ToListAsync();
-            
+
         return books.Select(b => new BookDto
         {
             Id = b.Id,
@@ -41,7 +41,7 @@ public class BookRepository : IBookRepository
             .Include(b => b.Publisher)
             .Where(b => b.Title.Contains(title))
             .ToListAsync();
-            
+
         return books.Select(b => new BookDto
         {
             Id = b.Id,
@@ -65,10 +65,10 @@ public class BookRepository : IBookRepository
             PublisherId = bookDto.PublisherId,
             AuthorId = bookDto.AuthorId
         };
-        
+
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
-        
+
         return book;
     }
 }

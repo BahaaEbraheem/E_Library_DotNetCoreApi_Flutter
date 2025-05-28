@@ -1,4 +1,4 @@
-namespace E_Library.API.Models;
+namespace e_library_backend.Models;
 
 public class Author
 {
@@ -8,6 +8,6 @@ public class Author
     public string? Country { get; set; }
     public string? City { get; set; }
     public string? Address { get; set; }
-    
+
     public ICollection<Book>? Books { get; set; }
 }

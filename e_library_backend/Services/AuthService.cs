@@ -1,13 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using E_Library.API.Data;
-using E_Library.API.DTOs;
-using E_Library.API.Models;
+using e_library_backend.Data;
+using e_library_backend.DTOs;
+using e_library_backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace E_Library.API.Services;
+namespace e_library_backend.Services;
 
 public class AuthService : IAuthService
 {
@@ -35,23 +35,23 @@ public class AuthService : IAuthService
         // Generate JWT token
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "YourSecretKeyHere12345678901234567890");
-        
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
-        
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
+                new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)
         };
-        
+
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
@@ -76,7 +76,7 @@ public class AuthService : IAuthService
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
-        
+
         return true;
     }
 }
