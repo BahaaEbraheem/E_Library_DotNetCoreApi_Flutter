@@ -58,13 +58,23 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Remove or comment out this section to avoid the binding conflict
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.ListenAnyIP(5298); // الاستماع على جميع عناوين IP على المنفذ 5298
+// });
+
 var app = builder.Build();
 
 // Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-Library API V1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.UseAuthentication();

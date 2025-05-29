@@ -31,5 +31,9 @@ public static class AuthEndpoints
             return Results.Ok(new { Message = "User registered successfully" });
         })
         .AddEndpointFilter<ValidationFilter<RegisterUserDto>>();
+
+        // إضافة نقطة نهاية للاختبار
+        group.MapGet("/ping", () => Results.Ok("pong"))
+            .AllowAnonymous();
     }
 }
