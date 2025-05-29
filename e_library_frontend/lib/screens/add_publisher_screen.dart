@@ -1,9 +1,10 @@
+import 'package:e_library_frontend/blocs/publishers/publishers_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
-import 'package:e_library_frontend/services/api_service.dart';
-
-import '../blocs/auth/auth_state.dart';
+import 'package:e_library_frontend/blocs/auth/auth_state.dart';
+import 'package:e_library_frontend/blocs/publishers/publishers_bloc.dart';
+import 'package:e_library_frontend/blocs/publishers/publishers_event.dart';
 
 class AddPublisherScreen extends StatefulWidget {
   const AddPublisherScreen({super.key});
@@ -16,7 +17,7 @@ class _AddPublisherScreenState extends State<AddPublisherScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _cityController = TextEditingController();
-  final ApiService _apiService = ApiService();
+
   bool _isLoading = false;
 
   @override
@@ -35,12 +36,25 @@ class _AddPublisherScreenState extends State<AddPublisherScreen> {
       try {
         final authState = context.read<AuthBloc>().state;
         if (authState is AuthAuthenticated) {
-          await _apiService.addPublisher(
-            authState.token as Map<String, dynamic>,
-            {'pName': _nameController.text, 'city': _cityController.text},
+          // استخدام PublishersBloc لإضافة الناشر
+          context.read<PublishersBloc>().add(
+            AddPublisherEvent(
+              token: authState.token,
+              name: _nameController.text,
+              city: _cityController.text,
+            ),
           );
 
+          // انتظار استجابة من الباك إند
+          await Future.delayed(const Duration(seconds: 2));
+
           if (mounted) {
+            // تحقق من حالة الـ bloc
+            final currentState = context.read<PublishersBloc>().state;
+            if (currentState is PublishersError) {
+              throw Exception(currentState.message);
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('تمت إضافة الناشر بنجاح')),
             );
@@ -66,12 +80,13 @@ class _AddPublisherScreenState extends State<AddPublisherScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إضافة ناشر جديد'), centerTitle: true),
-      body: Padding(
+      appBar: AppBar(title: const Text('إضافة ناشر'), centerTitle: true),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _nameController,
@@ -103,10 +118,16 @@ class _AddPublisherScreenState extends State<AddPublisherScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child:
                     _isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('إضافة الناشر'),
+                        : const Text(
+                          'إضافة الناشر',
+                          style: TextStyle(fontSize: 16),
+                        ),
               ),
             ],
           ),

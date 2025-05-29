@@ -7,4 +7,5 @@ public interface IPublisherRepository
     Task<IEnumerable<Publisher>> GetAllPublishersAsync();
     Task<IEnumerable<Publisher>> SearchPublishersByNameAsync(string name);
     Task<Publisher> CreatePublisherAsync(Publisher publisher);
+    Task<Publisher?> GetPublisherByIdAsync(int id);
 }

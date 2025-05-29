@@ -3,12 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_state.dart';
 import 'package:e_library_frontend/blocs/auth/auth_event.dart';
-import 'package:e_library_frontend/screens/books_screen.dart';
-import 'package:e_library_frontend/screens/authors_screen.dart';
-import 'package:e_library_frontend/screens/add_book_screen.dart';
-import 'package:e_library_frontend/screens/add_author_screen.dart';
-import 'package:e_library_frontend/screens/add_publisher_screen.dart';
-import 'package:e_library_frontend/screens/publishers_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -43,64 +37,56 @@ class HomeScreen extends StatelessWidget {
                     context,
                     'الكتب',
                     Icons.book,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BooksScreen()),
-                    ),
+                    () => Navigator.pushNamed(context, '/books'),
                   ),
                   _buildMenuCard(
                     context,
                     'المؤلفون',
                     Icons.person,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AuthorsScreen()),
-                    ),
+                    () => Navigator.pushNamed(context, '/authors'),
                   ),
                   _buildMenuCard(
                     context,
                     'الناشرون',
                     Icons.business,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PublishersScreen(),
-                      ),
-                    ),
+                    () => Navigator.pushNamed(context, '/publishers'),
+                  ),
+                  _buildMenuCard(
+                    context,
+                    'البحث عن كتاب',
+                    Icons.search,
+                    () => Navigator.pushNamed(context, '/search-books'),
+                  ),
+                  _buildMenuCard(
+                    context,
+                    'البحث عن مؤلف',
+                    Icons.person_search,
+                    () => Navigator.pushNamed(context, '/search-authors'),
+                  ),
+                  _buildMenuCard(
+                    context,
+                    'البحث عن ناشر',
+                    Icons.business_center,
+                    () => Navigator.pushNamed(context, '/search-publishers'),
                   ),
                   if (state.isAdmin) ...[
                     _buildMenuCard(
                       context,
                       'إضافة كتاب',
                       Icons.add_box,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddBookScreen(),
-                        ),
-                      ),
+                      () => Navigator.pushNamed(context, '/add-book'),
                     ),
                     _buildMenuCard(
                       context,
                       'إضافة مؤلف',
                       Icons.person_add,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddAuthorScreen(),
-                        ),
-                      ),
+                      () => Navigator.pushNamed(context, '/add-author'),
                     ),
                     _buildMenuCard(
                       context,
                       'إضافة ناشر',
                       Icons.add_business,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddPublisherScreen(),
-                        ),
-                      ),
+                      () => Navigator.pushNamed(context, '/add-publisher'),
                     ),
                   ],
                 ],

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using e_library_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace e_library_backend.Filters;
@@ -8,31 +9,40 @@ public class AdminAuthFilter : IEndpointFilter
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var httpContext = context.HttpContext;
-
-        // Check if user is authenticated
-        if (!httpContext.User.Identity?.IsAuthenticated ?? true)
+        
+        // التحقق من وجود رأس التفويض
+        if (!httpContext.Request.Headers.TryGetValue("Authorization", out var authHeader))
         {
             return Results.Unauthorized();
         }
-
-        // Check if user is admin
-        var isAdmin = httpContext.User.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "Admin";
-
-        if (!isAdmin)
+        
+        var authHeaderValue = authHeader.ToString();
+        if (string.IsNullOrEmpty(authHeaderValue) || !authHeaderValue.StartsWith("Bearer "))
         {
-            var problemDetails = new ProblemDetails
-            {
-                Status = 403,
-                Title = "Forbidden",
-                Detail = "You need administrator privileges to perform this action."
-            };
-
-            return Results.Problem(problemDetails);
+            return Results.Unauthorized();
         }
-
-        return await next(context);
+        
+        var token = authHeaderValue.Substring("Bearer ".Length).Trim();
+        
+        // التحقق من صحة التوكن وأن المستخدم هو مسؤول
+        try
+        {
+            // هنا يجب أن تكون لديك منطق للتحقق من التوكن
+            // وأن المستخدم هو مسؤول
+            
+            var userRepository = httpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var isAdmin = await userRepository.IsUserAdminByTokenAsync(token);
+            
+            if (!isAdmin)
+            {
+                return Results.Forbid();
+            }
+            
+            return await next(context);
+        }
+        catch
+        {
+            return Results.Unauthorized();
+        }
     }
 }
-
-

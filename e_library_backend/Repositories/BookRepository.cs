@@ -71,4 +71,70 @@ public class BookRepository : IBookRepository
 
         return book;
     }
+
+    public async Task<BookDto?> GetBookByIdAsync(int id)
+    {
+        var book = await _context.Books
+            .Include(b => b.Author)
+            .Include(b => b.Publisher)
+            .FirstOrDefaultAsync(b => b.Id == id);
+
+        if (book == null)
+            return null;
+
+        return new BookDto
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Type = book.Type,
+            Price = book.Price,
+            PublisherId = book.PublisherId,
+            PublisherName = book.Publisher?.PName ?? string.Empty,
+            AuthorId = book.AuthorId,
+            AuthorFullName = $"{book.Author?.FName} {book.Author?.LName}".Trim()
+        };
+    }
+
+    public async Task<IEnumerable<BookDto>> GetBooksByAuthorIdAsync(int authorId)
+    {
+        var books = await _context.Books
+            .Include(b => b.Author)
+            .Include(b => b.Publisher)
+            .Where(b => b.AuthorId == authorId)
+            .ToListAsync();
+
+        return books.Select(b => new BookDto
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Type = b.Type,
+            Price = b.Price,
+            PublisherId = b.PublisherId,
+            PublisherName = b.Publisher?.PName ?? string.Empty,
+            AuthorId = b.AuthorId,
+            AuthorFullName = $"{b.Author?.FName} {b.Author?.LName}".Trim()
+        });
+    }
+
+    public async Task<IEnumerable<BookDto>> GetBooksByPublisherIdAsync(int publisherId)
+    {
+        var books = await _context.Books
+            .Include(b => b.Author)
+            .Include(b => b.Publisher)
+            .Where(b => b.PublisherId == publisherId)
+            .ToListAsync();
+
+        return books.Select(b => new BookDto
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Type = b.Type,
+            Price = b.Price,
+            PublisherId = b.PublisherId,
+            PublisherName = b.Publisher?.PName ?? string.Empty,
+            AuthorId = b.AuthorId,
+            AuthorFullName = $"{b.Author?.FName} {b.Author?.LName}".Trim()
+        });
+    }
 }
+

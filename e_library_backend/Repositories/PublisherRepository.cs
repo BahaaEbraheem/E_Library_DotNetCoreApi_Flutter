@@ -31,4 +31,9 @@ public class PublisherRepository : IPublisherRepository
         await _context.SaveChangesAsync();
         return publisher;
     }
+
+    public async Task<Publisher?> GetPublisherByIdAsync(int id)
+    {
+        return await _context.Publishers.FindAsync(id);
+    }
 }

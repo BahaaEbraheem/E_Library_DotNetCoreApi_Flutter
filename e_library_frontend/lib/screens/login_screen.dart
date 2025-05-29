@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_event.dart';
 import 'package:e_library_frontend/blocs/auth/auth_state.dart';
-import 'package:e_library_frontend/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -108,9 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                    );
+                    Navigator.of(context).pushNamed('/register');
                   },
                   child: const Text('ليس لديك حساب؟ سجل الآن'),
                 ),

@@ -149,6 +149,39 @@ class ApiService {
     }
   }
 
+  // Books by ID
+  Future<Map<String, dynamic>> getBookById(int bookId) async {
+    try {
+      final response = await _dio.get('$baseUrl/books/$bookId');
+      return response.data;
+    } catch (e) {
+      debugPrint('Get book by ID error: $e');
+      throw Exception('Failed to load book details: ${e.toString()}');
+    }
+  }
+
+  // Books by Author ID
+  Future<List<dynamic>> getBooksByAuthorId(int authorId) async {
+    try {
+      final response = await _dio.get('$baseUrl/books/author/$authorId');
+      return response.data;
+    } catch (e) {
+      debugPrint('Get books by author ID error: $e');
+      throw Exception('Failed to load author books: ${e.toString()}');
+    }
+  }
+
+  // Books by Publisher ID
+  Future<List<dynamic>> getBooksByPublisherId(int publisherId) async {
+    try {
+      final response = await _dio.get('$baseUrl/books/publisher/$publisherId');
+      return response.data;
+    } catch (e) {
+      debugPrint('Get books by publisher ID error: $e');
+      throw Exception('Failed to load publisher books: ${e.toString()}');
+    }
+  }
+
   // Authors
   Future<List<dynamic>> getAllAuthors() async {
     try {
@@ -186,6 +219,17 @@ class ApiService {
     }
   }
 
+  // Author by ID
+  Future<Map<String, dynamic>> getAuthorById(int authorId) async {
+    try {
+      final response = await _dio.get('$baseUrl/authors/$authorId');
+      return response.data;
+    } catch (e) {
+      debugPrint('Get author by ID error: $e');
+      throw Exception('Failed to load author details: ${e.toString()}');
+    }
+  }
+
   // Publishers
   Future<List<dynamic>> getAllPublishers() async {
     try {
@@ -210,19 +254,59 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> addPublisher(
-    Map<String, dynamic> publisherData, [
-    Map<String, String>? map,
-  ]) async {
+  // Add Publisher
+  Future<void> addPublisher(
+    Map<String, dynamic> tokenMap,
+    Map<String, dynamic> publisherData,
+  ) async {
     try {
+      final String token = tokenMap['token'];
+
+      // تأكد من إعداد رؤوس التفويض بشكل صحيح
+      final options = Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // طباعة البيانات المرسلة للتشخيص
+      debugPrint('إرسال طلب إلى $baseUrl/publishers');
+      debugPrint('الرؤوس: ${options.headers}');
+      debugPrint('البيانات: $publisherData');
+
+      // التأكد من أن أسماء الحقول تتطابق مع الباك إند
+      final Map<String, dynamic> formattedData = {
+        'pName': publisherData['pName'],
+        'city': publisherData['city'],
+      };
+
+      // إرسال الطلب
       final response = await _dio.post(
         '$baseUrl/publishers',
-        data: publisherData,
+        data: formattedData,
+        options: options,
       );
+
+      debugPrint('تمت إضافة الناشر بنجاح');
+    } catch (e) {
+      debugPrint('خطأ في إضافة الناشر: $e');
+      if (e is DioException) {
+        debugPrint('رمز الحالة: ${e.response?.statusCode}');
+        debugPrint('بيانات الاستجابة: ${e.response?.data}');
+      }
+      throw Exception('فشل إضافة الناشر: ${e.toString()}');
+    }
+  }
+
+  // Publisher by ID
+  Future<Map<String, dynamic>> getPublisherById(int publisherId) async {
+    try {
+      final response = await _dio.get('$baseUrl/publishers/$publisherId');
       return response.data;
     } catch (e) {
-      debugPrint('Add publisher error: $e');
-      throw Exception('Failed to add publisher: ${e.toString()}');
+      debugPrint('Get publisher by ID error: $e');
+      throw Exception('Failed to load publisher details: ${e.toString()}');
     }
   }
 

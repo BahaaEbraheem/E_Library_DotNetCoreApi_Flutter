@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
-import 'package:e_library_frontend/services/api_service.dart';
-
-import '../blocs/auth/auth_state.dart';
+import 'package:e_library_frontend/blocs/auth/auth_state.dart';
+import 'package:e_library_frontend/blocs/authors/authors_bloc.dart';
+import 'package:e_library_frontend/blocs/authors/authors_event.dart';
 
 class AddAuthorScreen extends StatefulWidget {
   const AddAuthorScreen({super.key});
@@ -17,7 +17,7 @@ class _AddAuthorScreenState extends State<AddAuthorScreen> {
   final _nameController = TextEditingController();
   final _countryController = TextEditingController();
   final _cityController = TextEditingController();
-  final ApiService _apiService = ApiService();
+
   bool _isLoading = false;
 
   @override
@@ -37,11 +37,15 @@ class _AddAuthorScreenState extends State<AddAuthorScreen> {
       try {
         final authState = context.read<AuthBloc>().state;
         if (authState is AuthAuthenticated) {
-          await _apiService.addAuthor(authState.token as Map<String, dynamic>, {
-            'fullName': _nameController.text,
-            'country': _countryController.text,
-            'city': _cityController.text,
-          });
+          // استخدام AuthorsBloc لإضافة المؤلف
+          context.read<AuthorsBloc>().add(
+            AddAuthorEvent(
+              token: authState.token,
+              fullName: _nameController.text,
+              country: _countryController.text,
+              city: _cityController.text,
+            ),
+          );
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -69,12 +73,13 @@ class _AddAuthorScreenState extends State<AddAuthorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إضافة مؤلف جديد'), centerTitle: true),
-      body: Padding(
+      appBar: AppBar(title: const Text('إضافة مؤلف'), centerTitle: true),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _nameController,
@@ -120,10 +125,16 @@ class _AddAuthorScreenState extends State<AddAuthorScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child:
                     _isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('إضافة المؤلف'),
+                        : const Text(
+                          'إضافة المؤلف',
+                          style: TextStyle(fontSize: 16),
+                        ),
               ),
             ],
           ),

@@ -31,4 +31,9 @@ public class AuthorRepository : IAuthorRepository
         await _context.SaveChangesAsync();
         return author;
     }
+
+    public async Task<Author?> GetAuthorByIdAsync(int id)
+    {
+        return await _context.Authors.FindAsync(id);
+    }
 }

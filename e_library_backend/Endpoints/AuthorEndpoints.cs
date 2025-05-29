@@ -25,5 +25,15 @@ public static class AuthorEndpoints
             return Results.Created($"/api/authors/{createdAuthor.Id}", createdAuthor);
         })
         .AddEndpointFilter<AdminAuthFilter>();
+
+        // Get author by ID
+        group.MapGet("/authors/{id}", async (int id, IAuthorRepository authorRepository) =>
+        {
+            var author = await authorRepository.GetAuthorByIdAsync(id);
+            if (author == null)
+                return Results.NotFound();
+            
+            return Results.Ok(author);
+        });
     }
 }
