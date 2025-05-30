@@ -15,25 +15,36 @@ class BooksBloc extends Bloc<BooksEvent, BooksState> {
     on<DeleteBookEvent>(_onDeleteBook);
     on<UpdateBookEvent>(_onUpdateBook);
   }
-  // Add this method to your BooksBloc class
   Future<void> _onUpdateBook(
     UpdateBookEvent event,
     Emitter<BooksState> emit,
   ) async {
     emit(BooksLoading());
     try {
-      await _apiService
-          .updateBook(event.token as Map<String, dynamic>, event.bookId, {
-            'title': event.title,
-            'type': event.type,
-            'price': event.price,
-            'publisherId': event.publisherId,
-            'authorId': event.authorId,
-          });
+      // Add debug logs
+      debugPrint('Attempting to update book ID: ${event.bookId}');
+      debugPrint('Title: ${event.title}');
+      debugPrint('Type: ${event.type}');
+      debugPrint('Price: ${event.price}');
+      debugPrint('Publisher ID: ${event.publisherId}');
+      debugPrint('Author ID: ${event.authorId}');
 
-      // بعد التحديث، قم بتحميل الكتب مرة أخرى
+      await _apiService.updateBook(
+        {'token': event.token},
+        event.bookId,
+        {
+          'title': event.title,
+          'type': event.type,
+          'price': event.price,
+          'publisherId': event.publisherId,
+          'authorId': event.authorId,
+        },
+      );
+
+      // After successful update, reload books
       add(LoadBooksEvent());
     } catch (e) {
+      debugPrint('Error in _onUpdateBook: $e');
       emit(BooksError(message: e.toString()));
     }
   }
@@ -77,17 +88,29 @@ class BooksBloc extends Bloc<BooksEvent, BooksState> {
   Future<void> _onAddBook(AddBookEvent event, Emitter<BooksState> emit) async {
     emit(BooksLoading());
     try {
-      await _apiService.addBook(event.token as Map<String, dynamic>, {
-        'title': event.title,
-        'type': event.type,
-        'price': event.price,
-        'publisherId': event.publisherId,
-        'authorId': event.authorId,
-      });
+      // طباعة بيانات الكتاب للتشخيص
+      debugPrint('محاولة إضافة كتاب جديد:');
+      debugPrint('العنوان: ${event.title}');
+      debugPrint('النوع: ${event.type}');
+      debugPrint('السعر: ${event.price}');
+      debugPrint('معرف الناشر: ${event.publisherId}');
+      debugPrint('معرف المؤلف: ${event.authorId}');
+
+      await _apiService.addBook(
+        {'token': event.token},
+        {
+          'title': event.title,
+          'type': event.type,
+          'price': event.price,
+          'publisherId': event.publisherId,
+          'authorId': event.authorId,
+        },
+      );
 
       // بعد الإضافة، قم بتحميل الكتب مرة أخرى
       add(LoadBooksEvent());
     } catch (e) {
+      debugPrint('خطأ في إضافة الكتاب: $e');
       emit(BooksError(message: e.toString()));
     }
   }

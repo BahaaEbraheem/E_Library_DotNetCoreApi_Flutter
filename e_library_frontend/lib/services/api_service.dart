@@ -139,14 +139,43 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> addBook(
+    Map<String, dynamic> tokenMap,
     Map<String, dynamic> bookData,
-    Map<String, Object> map,
   ) async {
     try {
-      final response = await _dio.post('$baseUrl/books', data: bookData);
+      final String token = tokenMap['token'];
+
+      // Make sure token is properly formatted
+      final options = Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // Format data to match backend expectations
+      final Map<String, dynamic> formattedData = {
+        'Title': bookData['title'],
+        'Type': bookData['type'],
+        'Price': bookData['price'],
+        'PublisherId': bookData['publisherId'],
+        'AuthorId': bookData['authorId'],
+      };
+      debugPrint('Sending formatted data: $formattedData');
+      // Send request
+      final response = await _dio.post(
+        '$baseUrl/books',
+        data: formattedData,
+        options: options,
+      );
+
       return response.data;
     } catch (e) {
-      debugPrint('Add book error: $e');
+      if (e is DioException && e.response?.statusCode == 403) {
+        debugPrint('Authorization error: 403 Forbidden');
+        throw Exception('Access denied. Please check your permissions.');
+      }
+      // Other error handling...
       throw Exception('Failed to add book: ${e.toString()}');
     }
   }
@@ -489,18 +518,41 @@ class ApiService {
     int bookId,
     Map<String, dynamic> bookData,
   ) async {
-    final url = Uri.parse('$baseUrl/api/books/$bookId');
-    final response = await http.put(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${token['token']}',
-      },
-      body: jsonEncode(bookData),
-    );
+    try {
+      // Fix the URL path - remove the duplicate 'api'
+      final url = Uri.parse('$baseUrl/books/$bookId');
 
-    if (response.statusCode != 200) {
-      throw Exception('فشل تحديث الكتاب: ${response.body}');
+      // Format data to match backend expectations
+      final Map<String, dynamic> formattedData = {
+        'title': bookData['title'],
+        'type': bookData['type'],
+        'price': bookData['price'],
+        'publisherId': bookData['publisherId'],
+        'authorId': bookData['authorId'],
+      };
+
+      debugPrint('Updating book ID: $bookId');
+      debugPrint('Update data: $formattedData');
+
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${token['token']}',
+        },
+        body: jsonEncode(formattedData),
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('Update failed with status: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
+        throw Exception('فشل تحديث الكتاب: ${response.body}');
+      }
+
+      debugPrint('Book updated successfully');
+    } catch (e) {
+      debugPrint('Error updating book: $e');
+      throw Exception('فشل تحديث الكتاب: $e');
     }
   }
 

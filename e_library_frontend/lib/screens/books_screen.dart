@@ -28,7 +28,14 @@ class _BooksScreenState extends State<BooksScreen> {
   // تعديل الدالة لتستخدم BLoC
   Future<void> _loadBooks() async {
     // استخدام BLoC لتحميل البيانات
-    context.read<BooksBloc>().add(LoadBooksEvent());
+    // Check if bloc is closed before adding event
+    if (!_booksBloc.isClosed) {
+      context.read<BooksBloc>().add(LoadBooksEvent());
+    } else {
+      // If bloc is closed, get a new instance
+      _booksBloc = context.read<BooksBloc>();
+      _booksBloc.add(LoadBooksEvent());
+    }
   }
 
   @override
@@ -41,7 +48,9 @@ class _BooksScreenState extends State<BooksScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    _booksBloc.close();
+    // Don't close the bloc here as it's provided by a parent widget
+    // and might be needed elsewhere
+    // _booksBloc.close(); // Remove this line
     super.dispose();
   }
 

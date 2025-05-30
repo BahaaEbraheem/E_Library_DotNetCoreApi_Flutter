@@ -57,7 +57,7 @@ public static class BookEndpoints
                 return Results.BadRequest($"Error creating book: {ex.Message}");
             }
         })
-        .AddEndpointFilter<AdminAuthFilter>();
+         .RequireAuthorization("AdminOnly");
 
         // Get book by ID
         group.MapGet("/books/{id}", async (int id, IBookRepository bookRepository) =>
@@ -124,7 +124,7 @@ public static class BookEndpoints
                 return Results.BadRequest($"Error updating book: {ex.Message}");
             }
         })
-        .AddEndpointFilter<AdminAuthFilter>();
+         .RequireAuthorization("AdminOnly");
 
         // Delete book (admin only)
         group.MapDelete("/books/{id}", async (int id, IBookRepository bookRepository) =>
@@ -147,7 +147,7 @@ public static class BookEndpoints
                 return Results.BadRequest($"Error deleting book: {ex.Message}");
             }
         })
-        .AddEndpointFilter<AdminAuthFilter>();
+         .RequireAuthorization("AdminOnly");
     }
 }
 
