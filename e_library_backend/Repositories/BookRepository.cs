@@ -136,5 +136,36 @@ public class BookRepository : IBookRepository
             AuthorFullName = $"{b.Author?.FName} {b.Author?.LName}".Trim()
         });
     }
+
+    public async Task<bool> UpdateBookAsync(int id, CreateBookDto bookDto)
+    {
+        var book = await _context.Books.FindAsync(id);
+        if (book == null)
+            return false;
+
+        // تحديث بيانات الكتاب
+        book.Title = bookDto.Title;
+        book.Type = bookDto.Type;
+        book.Price = bookDto.Price;
+        book.AuthorId = bookDto.AuthorId;
+        book.PublisherId = bookDto.PublisherId;
+
+        _context.Books.Update(book);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteBookAsync(int id)
+    {
+        var book = await _context.Books.FindAsync(id);
+        if (book == null)
+            return false;
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
+
+
 

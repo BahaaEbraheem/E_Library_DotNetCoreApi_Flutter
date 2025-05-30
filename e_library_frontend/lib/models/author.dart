@@ -1,30 +1,51 @@
+import 'package:flutter/material.dart';
+
 class Author {
   final int id;
-  final String firstName;
-  final String lastName;
+  final String fullName;
   final String country;
   final String city;
-  final String address;
+  final String? address;
 
   Author({
     required this.id,
-    required this.firstName,
-    required this.lastName,
+    required this.fullName,
     required this.country,
     required this.city,
-    required this.address,
+    this.address,
   });
 
   factory Author.fromJson(Map<String, dynamic> json) {
+    // طباعة البيانات المستلمة للتشخيص
+    debugPrint('بيانات المؤلف من JSON: ${json.toString()}');
+
+    // تجميع الاسم الكامل من fName و lName
+    final firstName = json['fName'] ?? '';
+    final lastName = json['lName'] ?? '';
+    final fullName = '$firstName $lastName'.trim();
+
     return Author(
       id: json['id'],
-      firstName: json['fName'],
-      lastName: json['lName'],
+      fullName: fullName,
       country: json['country'] ?? '',
       city: json['city'] ?? '',
-      address: json['address'] ?? '',
+      address: json['address'],
     );
   }
 
-  String get fullName => '$firstName $lastName';
+  Map<String, dynamic> toJson() {
+    // تقسيم الاسم الكامل إلى اسم أول واسم أخير
+    final nameParts = fullName.split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+    return {
+      'id': id,
+      'fName': firstName,
+      'lName': lastName,
+      'country': country,
+      'city': city,
+      'address': address,
+    };
+  }
 }

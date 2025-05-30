@@ -1,22 +1,22 @@
-import 'package:e_library_frontend/blocs/books/books_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_library_frontend/models/book.dart';
+import 'package:e_library_frontend/models/author.dart';
+import 'package:e_library_frontend/models/publisher.dart';
+import 'package:e_library_frontend/services/api_service.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
 import 'package:e_library_frontend/blocs/auth/auth_state.dart';
 import 'package:e_library_frontend/blocs/books/books_bloc.dart';
 import 'package:e_library_frontend/blocs/books/books_event.dart';
-import 'package:e_library_frontend/models/author.dart';
-import 'package:e_library_frontend/models/publisher.dart';
-import 'package:e_library_frontend/services/api_service.dart';
 
-class AddBookScreen extends StatefulWidget {
-  const AddBookScreen({super.key});
+class EditBookScreen extends StatefulWidget {
+  const EditBookScreen({super.key});
 
   @override
-  State<AddBookScreen> createState() => _AddBookScreenState();
+  State<EditBookScreen> createState() => _EditBookScreenState();
 }
 
-class _AddBookScreenState extends State<AddBookScreen> {
+class _EditBookScreenState extends State<EditBookScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _typeController = TextEditingController();
@@ -26,26 +26,37 @@ class _AddBookScreenState extends State<AddBookScreen> {
 
   List<Author> _authors = [];
   List<Publisher> _publishers = [];
-
   int? _selectedAuthorId;
   int? _selectedPublisherId;
 
   bool _isLoading = false;
   bool _isLoadingData = true;
   String? _error;
+  late Book _book;
 
   @override
-  void initState() {
-    super.initState();
-    _loadData();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args.containsKey('book')) {
+      _book = args['book'] as Book;
+      _initializeFormData();
+      _loadData();
+    } else {
+      setState(() {
+        _error = 'لم يتم تمرير بيانات الكتاب';
+        _isLoadingData = false;
+      });
+    }
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _typeController.dispose();
-    _priceController.dispose();
-    super.dispose();
+  void _initializeFormData() {
+    _titleController.text = _book.title;
+    _typeController.text = _book.type;
+    _priceController.text = _book.price.toString();
+    _selectedAuthorId = _book.authorId;
+    _selectedPublisherId = _book.publisherId;
   }
 
   Future<void> _loadData() async {
@@ -55,7 +66,6 @@ class _AddBookScreenState extends State<AddBookScreen> {
     });
 
     try {
-      // تحميل المؤلفين والناشرين
       final authorsData = await _apiService.getAllAuthors();
       final publishersData = await _apiService.getAllPublishers();
 
@@ -82,10 +92,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
       try {
         final authState = context.read<AuthBloc>().state;
         if (authState is AuthAuthenticated) {
-          // إضافة الكتاب باستخدام BooksBloc
+          // تحديث الكتاب باستخدام BooksBloc
           context.read<BooksBloc>().add(
-            AddBookEvent(
+            UpdateBookEvent(
               token: authState.token,
+              bookId: _book.id,
               title: _titleController.text,
               type: _typeController.text,
               price: double.parse(_priceController.text),
@@ -94,25 +105,11 @@ class _AddBookScreenState extends State<AddBookScreen> {
             ),
           );
 
-          // انتظار استجابة من الباك إند
-          await Future.delayed(const Duration(seconds: 2));
-
           if (mounted) {
-            // تحقق من حالة الـ bloc
-            final currentState = context.read<BooksBloc>().state;
-            if (currentState is BooksError) {
-              throw Exception(currentState.message);
-            }
-
-            // تحديث قائمة الكتب قبل العودة
-            context.read<BooksBloc>().add(LoadBooksEvent());
-
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تمت إضافة الكتاب بنجاح')),
+              const SnackBar(content: Text('تم تحديث الكتاب بنجاح')),
             );
-
-            // العودة إلى الشاشة السابقة
-            Navigator.pop(context, true);
+            Navigator.pop(context);
           }
         }
       } catch (e) {
@@ -123,7 +120,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
           });
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('خطأ: ${e.toString()}')));
+          ).showSnackBar(SnackBar(content: Text('خطأ: $_error')));
         }
       } finally {
         if (mounted) {
@@ -136,20 +133,27 @@ class _AddBookScreenState extends State<AddBookScreen> {
   }
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _typeController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إضافة كتاب'), centerTitle: true),
+      appBar: AppBar(title: const Text('تعديل كتاب'), centerTitle: true),
       body:
           _isLoadingData
               ? const Center(child: CircularProgressIndicator())
-              : _error != null
-              ? Center(child: Text('خطأ: $_error'))
-              : SingleChildScrollView(
+              : _error != null && _error!.contains('لم يتم تمرير')
+              ? Center(child: Text(_error!))
+              : Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
                   key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: ListView(
                     children: [
                       TextFormField(
                         controller: _titleController,
@@ -191,23 +195,20 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             return 'الرجاء إدخال سعر الكتاب';
                           }
                           try {
-                            final price = double.parse(value);
-                            if (price <= 0) {
-                              return 'يجب أن يكون السعر أكبر من صفر';
-                            }
+                            double.parse(value);
                           } catch (e) {
-                            return 'الرجاء إدخال سعر صحيح';
+                            return 'الرجاء إدخال رقم صحيح';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<int>(
+                        value: _selectedAuthorId,
                         decoration: const InputDecoration(
                           labelText: 'المؤلف',
                           border: OutlineInputBorder(),
                         ),
-                        value: _selectedAuthorId,
                         items:
                             _authors.map((author) {
                               return DropdownMenuItem<int>(
@@ -220,15 +221,20 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             _selectedAuthorId = value;
                           });
                         },
-                        hint: const Text('اختر المؤلف'),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'الرجاء اختيار المؤلف';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<int>(
+                        value: _selectedPublisherId,
                         decoration: const InputDecoration(
                           labelText: 'الناشر',
                           border: OutlineInputBorder(),
                         ),
-                        value: _selectedPublisherId,
                         items:
                             _publishers.map((publisher) {
                               return DropdownMenuItem<int>(
@@ -241,21 +247,20 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             _selectedPublisherId = value;
                           });
                         },
-                        hint: const Text('اختر الناشر'),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'الرجاء اختيار الناشر';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: _isLoading ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
                         child:
                             _isLoading
                                 ? const CircularProgressIndicator()
-                                : const Text(
-                                  'إضافة الكتاب',
-                                  style: TextStyle(fontSize: 16),
-                                ),
+                                : const Text('حفظ التغييرات'),
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 16),
@@ -265,20 +270,6 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ],
-                      const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/add-author');
-                        },
-                        child: const Text('إضافة مؤلف جديد'),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/add-publisher');
-                        },
-                        child: const Text('إضافة ناشر جديد'),
-                      ),
                     ],
                   ),
                 ),

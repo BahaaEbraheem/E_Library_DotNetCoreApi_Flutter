@@ -8,4 +8,9 @@ public interface IPublisherRepository
     Task<IEnumerable<Publisher>> SearchPublishersByNameAsync(string name);
     Task<Publisher> CreatePublisherAsync(Publisher publisher);
     Task<Publisher?> GetPublisherByIdAsync(int id);
+    Task<bool> UpdatePublisherAsync(int id, Publisher publisher);
+    Task<bool> DeletePublisherAsync(int id);
 }
+
+
+

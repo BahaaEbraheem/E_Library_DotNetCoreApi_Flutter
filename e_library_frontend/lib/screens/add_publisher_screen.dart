@@ -55,14 +55,25 @@ class _AddPublisherScreenState extends State<AddPublisherScreen> {
               throw Exception(currentState.message);
             }
 
+            // تحديث قائمة الناشرين قبل العودة
+            context.read<PublishersBloc>().add(LoadPublishersEvent());
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('تمت إضافة الناشر بنجاح')),
             );
-            Navigator.pop(context);
+
+            // العودة إلى الشاشة السابقة
+            Navigator.pop(
+              context,
+              true,
+            ); // إرسال قيمة true للإشارة إلى أن الإضافة تمت بنجاح
           }
         }
       } catch (e) {
         if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('خطأ: ${e.toString()}')));

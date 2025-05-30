@@ -74,20 +74,14 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 150,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.book, size: 80, color: Colors.grey),
-            ),
-          ),
-          const SizedBox(height: 24),
+          // إضافة سجل للتشخيص
           Text(
-            _book!.title,
+            'بيانات الكتاب الكاملة: ${_book?.toJson()}',
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _book?.title ?? 'عنوان غير معروف',
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),

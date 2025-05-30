@@ -19,3 +19,24 @@ class AddPublisherEvent extends PublishersEvent {
     required this.city,
   });
 }
+
+class DeletePublisherEvent extends PublishersEvent {
+  final String token;
+  final int publisherId;
+
+  DeletePublisherEvent({required this.token, required this.publisherId});
+}
+
+class UpdatePublisherEvent extends PublishersEvent {
+  final String token;
+  final int publisherId;
+  final String name;
+  final String city;
+
+  UpdatePublisherEvent({
+    required this.token,
+    required this.publisherId,
+    required this.name,
+    required this.city,
+  });
+}

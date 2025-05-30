@@ -36,4 +36,32 @@ public class PublisherRepository : IPublisherRepository
     {
         return await _context.Publishers.FindAsync(id);
     }
+
+    public async Task<bool> UpdatePublisherAsync(int id, Publisher publisherData)
+    {
+        var publisher = await _context.Publishers.FindAsync(id);
+        if (publisher == null)
+            return false;
+
+        // تحديث بيانات الناشر
+        publisher.PName = publisherData.PName;
+        publisher.City = publisherData.City;
+
+        _context.Publishers.Update(publisher);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeletePublisherAsync(int id)
+    {
+        var publisher = await _context.Publishers.FindAsync(id);
+        if (publisher == null)
+            return false;
+
+        _context.Publishers.Remove(publisher);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
+
+

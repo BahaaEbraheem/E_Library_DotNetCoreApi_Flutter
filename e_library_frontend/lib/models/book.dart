@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+
 class Book {
   final int id;
   final String title;
   final String type;
   final double price;
-  final int publisherId;
-  final int authorId;
+  final int? authorId;
+  final int? publisherId;
   final String? authorName;
   final String? publisherName;
 
@@ -13,24 +15,38 @@ class Book {
     required this.title,
     required this.type,
     required this.price,
-    required this.publisherId,
-    required this.authorId,
+    this.authorId,
+    this.publisherId,
     this.authorName,
     this.publisherName,
   });
 
   factory Book.fromJson(Map<String, dynamic> json) {
+    // إضافة سجل للتشخيص
+    debugPrint('استلام بيانات الكتاب من API: $json');
+
     return Book(
-      id: json['id'],
-      title: json['title'],
-      type: json['type'],
-      price: json['price'].toDouble(),
-      publisherId: json['publisherId'],
+      id: json['id'] ?? 0,
+      title: json['title'] ?? '',
+      type: json['type'] ?? '',
+      price: (json['price'] ?? 0.0).toDouble(),
       authorId: json['authorId'],
-      authorName: json['author']?['fName'] != null && json['author']?['lName'] != null
-          ? "${json['author']['fName']} ${json['author']['lName']}"
-          : null,
-      publisherName: json['publisher']?['pName'],
+      publisherId: json['publisherId'],
+      authorName: json['authorName'],
+      publisherName: json['publisherName'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'type': type,
+      'price': price,
+      'authorId': authorId,
+      'publisherId': publisherId,
+      'authorName': authorName,
+      'publisherName': publisherName,
+    };
   }
 }

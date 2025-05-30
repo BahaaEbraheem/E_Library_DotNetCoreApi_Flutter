@@ -12,6 +12,8 @@ class PublishersBloc extends Bloc<PublishersEvent, PublishersState> {
     on<LoadPublishersEvent>(_onLoadPublishers);
     on<SearchPublishersEvent>(_onSearchPublishers);
     on<AddPublisherEvent>(_onAddPublisher);
+    on<DeletePublisherEvent>(_onDeletePublisher);
+    on<UpdatePublisherEvent>(_onUpdatePublisher);
   }
 
   Future<void> _onLoadPublishers(
@@ -69,6 +71,56 @@ class PublishersBloc extends Bloc<PublishersEvent, PublishersState> {
       add(LoadPublishersEvent());
     } catch (e) {
       debugPrint('Error adding publisher: ${e.toString()}');
+      emit(PublishersError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onDeletePublisher(
+    DeletePublisherEvent event,
+    Emitter<PublishersState> emit,
+  ) async {
+    emit(PublishersLoading());
+    try {
+      await _apiService.deletePublisher({
+        'token': event.token,
+      }, event.publisherId);
+
+      // بعد الحذف، قم بتحميل الناشرين مرة أخرى
+      add(LoadPublishersEvent());
+    } catch (e) {
+      debugPrint('Error deleting publisher: ${e.toString()}');
+      emit(PublishersError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdatePublisher(
+    UpdatePublisherEvent event,
+    Emitter<PublishersState> emit,
+  ) async {
+    emit(PublishersLoading());
+    try {
+      // طباعة بيانات التحديث للتشخيص
+      debugPrint(
+        'تحديث الناشر: ID=${event.publisherId}, الاسم=${event.name}, المدينة=${event.city}',
+      );
+      debugPrint('التوكن: ${event.token}');
+
+      // تأكد من أن التوكن ليس فارغًا
+      if (event.token.isEmpty) {
+        throw Exception('التوكن فارغ أو غير صالح');
+      }
+
+      // تمرير التوكن بشكل صحيح
+      await _apiService.updatePublisher(
+        {'token': event.token},
+        event.publisherId,
+        {'pName': event.name, 'city': event.city},
+      );
+
+      // بعد التحديث، قم بتحميل الناشرين مرة أخرى
+      add(LoadPublishersEvent());
+    } catch (e) {
+      debugPrint('خطأ في تحديث الناشر: ${e.toString()}');
       emit(PublishersError(message: e.toString()));
     }
   }

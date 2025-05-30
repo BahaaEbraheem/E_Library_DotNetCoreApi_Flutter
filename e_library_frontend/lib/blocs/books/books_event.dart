@@ -25,3 +25,30 @@ class AddBookEvent extends BooksEvent {
     required this.authorId,
   });
 }
+
+class DeleteBookEvent extends BooksEvent {
+  final String token;
+  final int bookId;
+
+  DeleteBookEvent({required this.token, required this.bookId});
+}
+
+class UpdateBookEvent extends BooksEvent {
+  final String token;
+  final int bookId;
+  final String title;
+  final String type;
+  final double price;
+  final int authorId;
+  final int publisherId;
+
+  UpdateBookEvent({
+    required this.token,
+    required this.bookId,
+    required this.title,
+    required this.type,
+    required this.price,
+    required this.authorId,
+    required this.publisherId,
+  });
+}

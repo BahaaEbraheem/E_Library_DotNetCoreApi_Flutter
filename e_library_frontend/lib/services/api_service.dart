@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/io.dart' show IOHttpClientAdapter;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 
 class ApiService {
   final Dio _dio = Dio();
@@ -10,20 +12,20 @@ class ApiService {
 
   ApiService() {
     if (Platform.isAndroid) {
-      // تعيين عنوان URL الأساسي مبدئ<|im_start|> إلى العنوان الذي نجح
-      baseUrl = 'http://192.168.42.10:5298/api';
-
       // تخزين قائمة العناوين البديلة
       _possibleIps = [
-        '192.168.42.10', // وضع العنوان الناجح أولاً
+        '10.0.2.2', // عنوان خاص بمحاكي الأندرويد (يشير إلى localhost على الكمبيوتر المضيف)
+        '192.168.42.10',
         '10.2.0.2',
         '192.168.43.230',
         '192.168.43.1',
         '192.168.42.129',
-        '10.0.2.2',
       ];
+
+      // تعيين عنوان URL الأساسي مبدئ<|im_start|> إلى عنوان المحاكي
+      baseUrl = 'http://10.0.2.2:5298/api';
     } else if (Platform.isIOS) {
-      baseUrl = 'http://192.168.42.10:5298/api';
+      baseUrl = 'http://localhost:5298/api'; // للمحاكي iOS استخدم localhost
     } else {
       baseUrl = 'http://localhost:5298/api';
     }
@@ -206,16 +208,45 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> addAuthor(
+  Future<dynamic> addAuthor(
+    Map<String, dynamic> headers,
     Map<String, dynamic> authorData,
-    Map<String, String> map,
   ) async {
     try {
-      final response = await _dio.post('$baseUrl/authors', data: authorData);
+      // طباعة الهيدرز والبيانات للتشخيص
+      debugPrint('إضافة مؤلف - الهيدرز: $headers');
+      debugPrint('إضافة مؤلف - البيانات: $authorData');
+
+      // تأكد من إرسال التوكن في الهيدر بالشكل الصحيح
+      final Map<String, dynamic> requestHeaders = {};
+
+      if (headers.containsKey('Authorization')) {
+        requestHeaders['Authorization'] = headers['Authorization'];
+      }
+
+      debugPrint('الهيدرز النهائية: $requestHeaders');
+      debugPrint('authorData:  $authorData');
+      debugPrint('baseUrl : $baseUrl');
+
+      final response = await _dio.post(
+        '$baseUrl/authors', // استخدام baseUrl بدلاً من _baseUrl
+        data: authorData,
+        options: Options(headers: requestHeaders),
+      );
+
+      debugPrint(
+        'استجابة إضافة المؤلف: ${response.statusCode} - ${response.data}',
+      );
       return response.data;
     } catch (e) {
-      debugPrint('Add author error: $e');
-      throw Exception('Failed to add author: ${e.toString()}');
+      debugPrint('خطأ Dio: ${e.runtimeType}');
+      if (e is DioException) {
+        debugPrint('رسالة الخطأ: ${e.message}');
+        debugPrint('استجابة الخطأ:');
+        debugPrint('كود الاستجابة: ${e.response?.statusCode}');
+        debugPrint('بيانات الاستجابة: ${e.response?.data}');
+      }
+      throw Exception('فشل إضافة المؤلف: $e');
     }
   }
 
@@ -282,7 +313,7 @@ class ApiService {
       };
 
       // إرسال الطلب
-      final response = await _dio.post(
+      await _dio.post(
         '$baseUrl/publishers',
         data: formattedData,
         options: options,
@@ -310,8 +341,27 @@ class ApiService {
     }
   }
 
-  // التحقق من الاتصال بالخادم
+  // التحقق من الاتصال بالخادم مع محاولات متعددة
   Future<bool> isServerReachable() async {
+    // التحقق أولاً مما إذا كان التطبيق يعمل على محاكي
+    if (await _isEmulator()) {
+      baseUrl = 'http://10.0.2.2:5298/api';
+      try {
+        final response = await _dio.get(
+          '$baseUrl/ping',
+          options: Options(
+            receiveTimeout: const Duration(seconds: 5),
+            sendTimeout: const Duration(seconds: 5),
+          ),
+        );
+        return response.statusCode == 200;
+      } catch (e) {
+        debugPrint('فشل الاتصال بالخادم على عنوان المحاكي');
+        return false;
+      }
+    }
+
+    // إذا لم يكن محاكي، استمر بالطريقة العادية
     if (Platform.isAndroid && _possibleIps != null) {
       for (String ip in _possibleIps!) {
         if (ip.isEmpty) continue;
@@ -359,5 +409,242 @@ class ApiService {
         return false;
       }
     }
+  }
+
+  Future<void> deleteAuthor(Map<String, dynamic> token, int authorId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/authors/$authorId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token['token']}',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('فشل حذف المؤلف: ${response.body}');
+    }
+  }
+
+  Future<void> deletePublisher(
+    Map<String, dynamic> token,
+    int publisherId,
+  ) async {
+    try {
+      final String tokenStr = token['token'];
+
+      // تأكد من إعداد رؤوس التفويض بشكل صحيح
+      final options = Options(
+        headers: {
+          'Authorization': 'Bearer $tokenStr',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      debugPrint(
+        'محاولة حذف الناشر باستخدام: $baseUrl/publishers/$publisherId',
+      );
+
+      // استخدام Dio بدلاً من http
+      await _dio.delete('$baseUrl/publishers/$publisherId', options: options);
+
+      debugPrint('تم حذف الناشر بنجاح');
+    } catch (e) {
+      debugPrint('خطأ في حذف الناشر: $e');
+      if (e is DioException) {
+        debugPrint('رمز الحالة: ${e.response?.statusCode}');
+        debugPrint('بيانات الاستجابة: ${e.response?.data}');
+      }
+      throw Exception('فشل حذف الناشر: ${e.toString()}');
+    }
+  }
+
+  Future<void> deleteBook(Map<String, dynamic> token, int bookId) async {
+    try {
+      final String tokenStr = token['token'];
+
+      // تأكد من إعداد رؤوس التفويض بشكل صحيح
+      final options = Options(
+        headers: {
+          'Authorization': 'Bearer $tokenStr',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // إرسال الطلب
+      await _dio.delete('$baseUrl/books/$bookId', options: options);
+
+      debugPrint('تم حذف الكتاب بنجاح');
+    } catch (e) {
+      debugPrint('خطأ في حذف الكتاب: $e');
+      if (e is DioException) {
+        debugPrint('رمز الحالة: ${e.response?.statusCode}');
+        debugPrint('بيانات الاستجابة: ${e.response?.data}');
+      }
+      throw Exception('فشل حذف الكتاب: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateBook(
+    Map<String, dynamic> token,
+    int bookId,
+    Map<String, dynamic> bookData,
+  ) async {
+    final url = Uri.parse('$baseUrl/api/books/$bookId');
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token['token']}',
+      },
+      body: jsonEncode(bookData),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('فشل تحديث الكتاب: ${response.body}');
+    }
+  }
+
+  Future<void> updateAuthor(
+    Map<String, dynamic> tokenMap,
+    int authorId,
+    Map<String, dynamic> authorData,
+  ) async {
+    try {
+      final String token = tokenMap['token'];
+
+      // تأكد من إعداد رؤوس التفويض بشكل صحيح
+      final options = Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // تحويل البيانات لتتطابق مع ما يتوقعه الخادم
+      final Map<String, dynamic> formattedData = {};
+
+      // تقسيم الاسم الكامل إلى اسم أول واسم أخير
+      final nameParts = authorData['fullName']?.split(' ') ?? [];
+      formattedData['fName'] = nameParts.isNotEmpty ? nameParts.first : '';
+      formattedData['lName'] =
+          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+      formattedData['country'] = authorData['country'] ?? '';
+      formattedData['city'] = authorData['city'] ?? '';
+
+      // طباعة البيانات المرسلة للتشخيص
+      debugPrint('إرسال طلب تحديث إلى $baseUrl/authors/$authorId');
+      debugPrint('الرؤوس: ${options.headers}');
+      debugPrint('البيانات: $formattedData');
+
+      // إرسال الطلب
+      await _dio.put(
+        '$baseUrl/authors/$authorId',
+        data: formattedData,
+        options: options,
+      );
+    } catch (e) {
+      debugPrint('Update author error: $e');
+      throw Exception('Failed to update author: ${e.toString()}');
+    }
+  }
+
+  Future<void> updatePublisher(
+    Map<String, dynamic> token,
+    int publisherId,
+    Map<String, dynamic> publisherData,
+  ) async {
+    try {
+      final String tokenStr = token['token'];
+      debugPrint('التوكن المستخدم: $tokenStr');
+
+      // تجربة طريقة مختلفة للتحديث
+      // 1. أولاً، دعنا نحاول الحصول على الناشر الحالي للتأكد من أن الاتصال يعمل
+      final currentPublisher = await getPublisherById(publisherId);
+      debugPrint(
+        'تم الحصول على الناشر الحالي: ${currentPublisher['pName']}, ${currentPublisher['city']}',
+      );
+
+      // 2. إعداد البيانات بشكل مختلف - إضافة معرف الناشر في البيانات
+      final Map<String, dynamic> completeData = {
+        'id': publisherId,
+        'pName': publisherData['pName'],
+        'city': publisherData['city'],
+        // إضافة حقل books فارغ لتجنب أي مشاكل
+        'books': null,
+      };
+
+      // 3. استخدام طريقة مختلفة للإرسال
+      final url = Uri.parse('$baseUrl/publishers/$publisherId');
+      final jsonBody = jsonEncode(completeData);
+
+      debugPrint('إرسال طلب تحديث إلى $url');
+      debugPrint('البيانات الكاملة: $jsonBody');
+
+      // تجربة طريقة مختلفة لإرسال الهيدرز
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $tokenStr',
+          'Accept': 'application/json',
+        },
+        body: jsonBody,
+      );
+
+      debugPrint('استجابة HTTP: ${response.statusCode}');
+      debugPrint('محتوى الاستجابة: ${response.body}');
+
+      if (response.statusCode != 200) {
+        // تجربة طريقة أخرى - استخدام PATCH بدلاً من PUT
+        final patchResponse = await http.patch(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $tokenStr',
+            'Accept': 'application/json',
+          },
+          body: jsonBody,
+        );
+
+        debugPrint('استجابة PATCH: ${patchResponse.statusCode}');
+        debugPrint('محتوى استجابة PATCH: ${patchResponse.body}');
+
+        if (patchResponse.statusCode != 200) {
+          throw Exception(
+            'فشل تحديث الناشر: ${response.statusCode} - ${response.body}',
+          );
+        }
+      }
+
+      debugPrint('تم تحديث الناشر بنجاح');
+    } catch (e) {
+      debugPrint('خطأ في تحديث الناشر: $e');
+      throw Exception('فشل تحديث الناشر: ${e.toString()}');
+    }
+  }
+
+  // التحقق مما إذا كان التطبيق يعمل على محاكي
+  Future<bool> _isEmulator() async {
+    if (Platform.isAndroid) {
+      try {
+        // محاولة الاتصال بعنوان المحاكي الافتراضي
+        final response = await _dio.get(
+          'http://10.0.2.2:5298/api/ping',
+          options: Options(
+            receiveTimeout: const Duration(seconds: 3),
+            sendTimeout: const Duration(seconds: 3),
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          debugPrint('تم اكتشاف أن التطبيق يعمل على محاكي');
+          return true;
+        }
+      } catch (e) {
+        // تجاهل الخطأ
+      }
+    }
+    return false;
   }
 }

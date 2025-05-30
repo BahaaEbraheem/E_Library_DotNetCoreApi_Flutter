@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/blocs/books/books_event.dart';
 import 'package:e_library_frontend/blocs/books/books_state.dart';
@@ -11,6 +12,30 @@ class BooksBloc extends Bloc<BooksEvent, BooksState> {
     on<LoadBooksEvent>(_onLoadBooks);
     on<SearchBooksEvent>(_onSearchBooks);
     on<AddBookEvent>(_onAddBook);
+    on<DeleteBookEvent>(_onDeleteBook);
+    on<UpdateBookEvent>(_onUpdateBook);
+  }
+  // Add this method to your BooksBloc class
+  Future<void> _onUpdateBook(
+    UpdateBookEvent event,
+    Emitter<BooksState> emit,
+  ) async {
+    emit(BooksLoading());
+    try {
+      await _apiService
+          .updateBook(event.token as Map<String, dynamic>, event.bookId, {
+            'title': event.title,
+            'type': event.type,
+            'price': event.price,
+            'publisherId': event.publisherId,
+            'authorId': event.authorId,
+          });
+
+      // بعد التحديث، قم بتحميل الكتب مرة أخرى
+      add(LoadBooksEvent());
+    } catch (e) {
+      emit(BooksError(message: e.toString()));
+    }
   }
 
   Future<void> _onLoadBooks(
@@ -20,9 +45,17 @@ class BooksBloc extends Bloc<BooksEvent, BooksState> {
     emit(BooksLoading());
     try {
       final booksData = await _apiService.getAllBooks();
+
+      // إضافة سجل للتشخيص
+      debugPrint('تم استلام ${booksData.length} كتاب من API');
+      debugPrint(
+        'عينة من البيانات: ${booksData.isNotEmpty ? booksData[0] : "لا توجد بيانات"}',
+      );
+
       final books = booksData.map((book) => Book.fromJson(book)).toList();
       emit(BooksLoaded(books: books));
     } catch (e) {
+      debugPrint('خطأ في تحميل الكتب: $e');
       emit(BooksError(message: e.toString()));
     }
   }
@@ -53,6 +86,21 @@ class BooksBloc extends Bloc<BooksEvent, BooksState> {
       });
 
       // بعد الإضافة، قم بتحميل الكتب مرة أخرى
+      add(LoadBooksEvent());
+    } catch (e) {
+      emit(BooksError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteBook(
+    DeleteBookEvent event,
+    Emitter<BooksState> emit,
+  ) async {
+    emit(BooksLoading());
+    try {
+      await _apiService.deleteBook({'token': event.token}, event.bookId);
+
+      // بعد الحذف، قم بتحميل الكتب مرة أخرى
       add(LoadBooksEvent());
     } catch (e) {
       emit(BooksError(message: e.toString()));

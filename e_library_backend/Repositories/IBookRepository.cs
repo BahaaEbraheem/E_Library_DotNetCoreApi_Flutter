@@ -11,5 +11,11 @@ public interface IBookRepository
     Task<BookDto?> GetBookByIdAsync(int id);
     Task<IEnumerable<BookDto>> GetBooksByAuthorIdAsync(int authorId);
     Task<IEnumerable<BookDto>> GetBooksByPublisherIdAsync(int publisherId);
+    Task<bool> UpdateBookAsync(int id, CreateBookDto bookDto);
+    Task<bool> DeleteBookAsync(int id);
 }
+
+
+
+
 

@@ -1,4 +1,6 @@
+import 'package:e_library_frontend/screens/edit_book_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_library_frontend/services/api_service.dart';
 import 'package:e_library_frontend/blocs/auth/auth_bloc.dart';
@@ -21,8 +23,22 @@ import 'package:e_library_frontend/screens/search_books_screen.dart';
 import 'package:e_library_frontend/screens/search_authors_screen.dart';
 import 'package:e_library_frontend/screens/search_publishers_screen.dart';
 import 'package:e_library_frontend/utils/route_guard.dart';
+import 'package:e_library_frontend/screens/edit_author_screen.dart';
+import 'package:e_library_frontend/screens/edit_publisher_screen.dart';
 
 void main() {
+  // تأكد من تهيئة Flutter
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // تكوين النظام لقبول إدخال لوحة المفاتيح
+  SystemChannels.textInput.invokeMethod('TextInput.setClient', [
+    1,
+    {
+      'inputType': {'name': 'TextInputType.text'},
+      'inputAction': 'TextInputAction.done',
+    },
+  ]);
+
   runApp(const MyApp());
 }
 
@@ -42,7 +58,31 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'E-Library',
-        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          // إضافة تكوين لتحسين تجربة لوحة المفاتيح
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 2.0),
+            ),
+          ),
+        ),
+        home: Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            // اختصار Enter للإرسال
+            LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+            // اختصار Tab للانتقال بين الحقول
+            LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+            // اختصار Shift+Tab للانتقال للحقل السابق
+            LogicalKeySet(LogicalKeyboardKey.tab, LogicalKeyboardKey.shift):
+                const PreviousFocusIntent(),
+          },
+          child: const LoginScreen(),
+        ),
         initialRoute: '/login',
         routes: {
           // المسارات الأساسية
@@ -58,10 +98,15 @@ class MyApp extends StatelessWidget {
           '/publishers': (context) => const PublishersScreen(),
           '/publisher-details': (context) => const PublisherDetailsScreen(),
 
-          // مسارات البحث (متاحة لجميع المستخدمين)
+          // مسارات البحث
           '/search-books': (context) => const SearchBooksScreen(),
           '/search-authors': (context) => const SearchAuthorsScreen(),
           '/search-publishers': (context) => const SearchPublishersScreen(),
+
+          // مسار تعديل الكتاب
+          '/edit-book': (context) => const EditBookScreen(),
+          '/edit-author': (context) => const EditAuthorScreen(),
+          '/edit-publisher': (context) => const EditPublisherScreen(),
         },
         // استخدام onGenerateRoute للمسارات التي تحتاج إلى حماية (للمسؤول فقط)
         onGenerateRoute: (settings) {
