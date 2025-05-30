@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using e_library_backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,20 +26,11 @@ public class LibraryDbContext : DbContext
             .WithMany(p => p.Books)
             .HasForeignKey(b => b.PublisherId);
 
-        // Seed admin user
-        modelBuilder.Entity<User>().HasData(
-            new User
-            {
-                Id = 1,
-                Username = "admin",
-                Password = "admin123", // In production, use hashed passwords
-                FName = "Admin",
-                LName = "User",
-                IsAdmin = true
-            }
-        );
+
     }
 }
+
+
 
 
 

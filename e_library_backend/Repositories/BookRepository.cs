@@ -20,7 +20,6 @@ public class BookRepository : IBookRepository
             .Include(b => b.Author)
             .Include(b => b.Publisher)
             .ToListAsync();
-
         return books.Select(b => new BookDto
         {
             Id = b.Id,
@@ -33,7 +32,6 @@ public class BookRepository : IBookRepository
             AuthorFullName = $"{b.Author?.FName} {b.Author?.LName}".Trim()
         });
     }
-
     public async Task<IEnumerable<BookDto>> SearchBooksByTitleAsync(string title)
     {
         var books = await _context.Books
@@ -41,7 +39,6 @@ public class BookRepository : IBookRepository
             .Include(b => b.Publisher)
             .Where(b => b.Title.Contains(title))
             .ToListAsync();
-
         return books.Select(b => new BookDto
         {
             Id = b.Id,
@@ -54,7 +51,6 @@ public class BookRepository : IBookRepository
             AuthorFullName = $"{b.Author?.FName} {b.Author?.LName}".Trim()
         });
     }
-
     public async Task<Book> CreateBookAsync(CreateBookDto bookDto)
     {
         var book = new Book
@@ -65,13 +61,10 @@ public class BookRepository : IBookRepository
             PublisherId = bookDto.PublisherId,
             AuthorId = bookDto.AuthorId
         };
-
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
-
         return book;
     }
-
     public async Task<BookDto?> GetBookByIdAsync(int id)
     {
         var book = await _context.Books
