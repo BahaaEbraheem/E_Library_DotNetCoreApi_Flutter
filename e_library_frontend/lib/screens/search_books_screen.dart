@@ -56,10 +56,7 @@ class _SearchBooksScreenState extends State<SearchBooksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('البحث عن كتاب'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('البحث عن كتاب'), centerTitle: true),
       body: Column(
         children: [
           Padding(
@@ -83,25 +80,26 @@ class _SearchBooksScreenState extends State<SearchBooksScreen> {
                   },
                 ),
               ),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
               onSubmitted: (value) {
                 _searchBooks(value);
               },
             ),
           ),
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null
                     ? Center(child: Text('خطأ: $_error'))
                     : !_hasSearched
-                        ? const Center(
-                            child: Text('أدخل جزءًا من عنوان الكتاب للبحث'),
-                          )
-                        : _books.isEmpty
-                            ? const Center(
-                                child: Text('لا توجد كتب تطابق البحث'),
-                              )
-                            : _buildBooksList(),
+                    ? const Center(
+                      child: Text('أدخل جزءًا من عنوان الكتاب للبحث'),
+                    )
+                    : _books.isEmpty
+                    ? const Center(child: Text('لا توجد كتب تطابق البحث'))
+                    : _buildBooksList(),
           ),
         ],
       ),

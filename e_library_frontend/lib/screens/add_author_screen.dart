@@ -142,13 +142,15 @@ class _AddAuthorScreenState extends State<AddAuthorScreen> {
                   labelText: 'اسم المؤلف',
                   border: OutlineInputBorder(),
                 ),
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                keyboardType: TextInputType.text, // Ensure text keyboard type
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'الرجاء إدخال اسم المؤلف';
                   }
                   return null;
                 },
-                // تمكين إدخال النص من لوحة المفاتيح
                 autofocus: true,
                 textInputAction: TextInputAction.next,
               ),

@@ -33,9 +33,12 @@ dependencies:
   dio: ^5.8.0+1
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_offline: ^5.0.0
   http: ^1.1.0
+  intl: ^0.20.2 # Updated from ^0.18.0
   jwt_decoder: ^2.0.1
 
 dev_dependencies:

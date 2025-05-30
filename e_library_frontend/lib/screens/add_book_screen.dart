@@ -34,6 +34,18 @@ class _AddBookScreenState extends State<AddBookScreen> {
   bool _isLoadingData = true;
   String? _error;
 
+  // دالة لتحويل الأرقام العربية إلى أرقام إنجليزية
+  String _convertArabicToEnglishNumbers(String input) {
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٣', '٨', '٩'];
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    for (int i = 0; i < arabic.length; i++) {
+      input = input.replaceAll(arabic[i], english[i]);
+    }
+
+    return input;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -88,7 +100,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
               token: authState.token,
               title: _titleController.text,
               type: _typeController.text,
-              price: double.parse(_priceController.text),
+              price: double.parse(
+                _convertArabicToEnglishNumbers(_priceController.text),
+              ),
               authorId: _selectedAuthorId!,
               publisherId: _selectedPublisherId!,
             ),
@@ -157,12 +171,19 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           labelText: 'عنوان الكتاب',
                           border: OutlineInputBorder(),
                         ),
+                        textDirection:
+                            TextDirection.rtl, // Add this for RTL text
+                        textAlign:
+                            TextAlign.right, // Add this for RTL alignment
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'الرجاء إدخال عنوان الكتاب';
                           }
                           return null;
                         },
+                        // تمكين إدخال النص من لوحة المفاتيح
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -191,7 +212,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
                             return 'الرجاء إدخال سعر الكتاب';
                           }
                           try {
-                            final price = double.parse(value);
+                            final convertedValue =
+                                _convertArabicToEnglishNumbers(value);
+                            final price = double.parse(convertedValue);
                             if (price <= 0) {
                               return 'يجب أن يكون السعر أكبر من صفر';
                             }

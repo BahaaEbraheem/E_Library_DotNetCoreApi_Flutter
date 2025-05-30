@@ -86,6 +86,8 @@ class _EditPublisherScreenState extends State<EditPublisherScreen> {
           await Future.delayed(const Duration(seconds: 2));
 
           // التحقق من حالة الـ bloc بعد التحديث
+          if (!mounted) return; // Add this check
+
           final currentState = context.read<PublishersBloc>().state;
           if (currentState is PublishersError) {
             throw Exception(currentState.message);

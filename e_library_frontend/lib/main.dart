@@ -25,6 +25,7 @@ import 'package:e_library_frontend/screens/search_publishers_screen.dart';
 import 'package:e_library_frontend/utils/route_guard.dart';
 import 'package:e_library_frontend/screens/edit_author_screen.dart';
 import 'package:e_library_frontend/screens/edit_publisher_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   // تأكد من تهيئة Flutter
@@ -58,9 +59,26 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'E-Library',
+        // Add these localization delegates
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        // Add Arabic and English as supported locales
+        supportedLocales: const [
+          Locale('ar'), // Arabic
+          Locale('en'), // English
+        ],
+        // Set Arabic as the default locale
+        locale: const Locale('ar'),
         theme: ThemeData(
           primarySwatch: Colors.blue,
           useMaterial3: true,
+          // Configure text direction for RTL languages
+          textTheme: const TextTheme(
+            bodyMedium: TextStyle(fontFamily: 'Arial'),
+          ),
           // إضافة تكوين لتحسين تجربة لوحة المفاتيح
           inputDecorationTheme: const InputDecorationTheme(
             filled: true,
