@@ -33,6 +33,17 @@ class _EditBookScreenState extends State<EditBookScreen> {
   bool _isLoadingData = true;
   String? _error;
   late Book _book;
+  // دالة لتحويل الأرقام العربية إلى أرقام إنجليزية
+  String _convertArabicToEnglishNumbers(String input) {
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٣', '٨', '٩'];
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    for (int i = 0; i < arabic.length; i++) {
+      input = input.replaceAll(arabic[i], english[i]);
+    }
+
+    return input;
+  }
 
   @override
   void didChangeDependencies() {
@@ -141,7 +152,9 @@ class _EditBookScreenState extends State<EditBookScreen> {
               bookId: _book.id,
               title: _titleController.text,
               type: _typeController.text,
-              price: double.parse(_priceController.text),
+              price: double.parse(
+                _convertArabicToEnglishNumbers(_priceController.text),
+              ),
               authorId: _selectedAuthorId!,
               publisherId: _selectedPublisherId!,
             ),
@@ -231,8 +244,15 @@ class _EditBookScreenState extends State<EditBookScreen> {
                           if (value == null || value.isEmpty) {
                             return 'الرجاء إدخال السعر';
                           }
-                          if (double.tryParse(value) == null) {
-                            return 'الرجاء إدخال رقم صحيح';
+                          try {
+                            final convertedValue =
+                                _convertArabicToEnglishNumbers(value);
+                            final price = double.parse(convertedValue);
+                            if (price <= 0) {
+                              return 'يجب أن يكون السعر أكبر من صفر';
+                            }
+                          } catch (e) {
+                            return 'الرجاء إدخال سعر صحيح';
                           }
                           return null;
                         },
