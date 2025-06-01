@@ -36,7 +36,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
 
   // دالة لتحويل الأرقام العربية إلى أرقام إنجليزية
   String _convertArabicToEnglishNumbers(String input) {
-    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٣', '٨', '٩'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
     for (int i = 0; i < arabic.length; i++) {
