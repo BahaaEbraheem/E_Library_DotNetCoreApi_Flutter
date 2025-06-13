@@ -4,7 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+<<<<<<< HEAD
     <ActiveDebugProfile>https</ActiveDebugProfile>
+=======
+    <!--<ActiveDebugProfile>https</ActiveDebugProfile>-->
+>>>>>>> d569d34 (commit)
   </PropertyGroup>
 
   <ItemGroup>
