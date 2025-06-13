@@ -12,26 +12,23 @@ class ApiService {
 
   ApiService() {
     if (Platform.isAndroid) {
-<<<<<<< HEAD
-      // تخزين قائمة العناوين البديلة
-      _possibleIps = [
-        '10.0.2.2', // عنوان خاص بمحاكي الأندرويد (يشير إلى localhost على الكمبيوتر المضيف)
-        '192.168.42.10',
-        '10.2.0.2',
-        '192.168.43.230',
-        '192.168.43.1',
-        '192.168.42.129',
-      ];
+      //   // تخزين قائمة العناوين البديلة
+      //   _possibleIps = [
+      //     '10.0.2.2', // عنوان خاص بمحاكي الأندرويد (يشير إلى localhost على الكمبيوتر المضيف)
+      //     '192.168.42.10',
+      //     '10.2.0.2',
+      //     '192.168.43.230',
+      //     '192.168.43.1',
+      //     '192.168.42.129',
+      //   ];
 
-      // تعيين عنوان URL الأساسي مبدئ<|im_start|> إلى عنوان المحاكي
-      baseUrl = 'http://10.0.2.2:5298/api';
-    } else if (Platform.isIOS) {
-      baseUrl = 'http://localhost:5298/api'; // للمحاكي iOS استخدم localhost
-    } else {
-      baseUrl = 'http://localhost:5298/api';
-=======
+      //   // تعيين عنوان URL الأساسي مبدئ<|im_start|> إلى عنوان المحاكي
+      //   baseUrl = 'http://10.0.2.2:5298/api';
+      // } else if (Platform.isIOS) {
+      //   baseUrl = 'http://localhost:5298/api'; // للمحاكي iOS استخدم localhost
+      // } else {
+      //   baseUrl = 'http://localhost:5298/api';
       baseUrl = 'http://elibrary2025.somee.com/api';
->>>>>>> d569d34 (commit)
     }
 
     // إعدادات Dio
@@ -378,11 +375,7 @@ class ApiService {
   Future<bool> isServerReachable() async {
     // التحقق أولاً مما إذا كان التطبيق يعمل على محاكي
     if (await _isEmulator()) {
-<<<<<<< HEAD
-      baseUrl = 'http://10.0.2.2:5298/api';
-=======
       baseUrl = 'http://elibrary2025.somee.com/api';
->>>>>>> d569d34 (commit)
       try {
         final response = await _dio.get(
           '$baseUrl/ping',
@@ -690,11 +683,7 @@ class ApiService {
       try {
         // محاولة الاتصال بعنوان المحاكي الافتراضي
         final response = await _dio.get(
-<<<<<<< HEAD
-          'http://10.0.2.2:5298/api/ping',
-=======
           'http://elibrary2025.somee.com/api/ping',
->>>>>>> d569d34 (commit)
           options: Options(
             receiveTimeout: const Duration(seconds: 3),
             sendTimeout: const Duration(seconds: 3),
