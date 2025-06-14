@@ -244,33 +244,19 @@ app.UseAuthorization();
 app.UseCors("AllowAll");
 
 // تعديل هنا: إما تعطيل التحويل في بيئة التطوير أو تحديد المنفذ صراحةً
-<<<<<<< HEAD
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-else
-{
-    // أو استخدم هذا البديل لتحديد المنفذ صراحةً
-    // app.UseHttpsRedirection(new HttpsRedirectionOptions
-    // {
-    //     HttpsPort = 7206
-    // });
-}
-=======
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseHttpsRedirection();
-//}
-//else
-//{
-//    // أو استخدم هذا البديل لتحديد المنفذ صراحةً
-//    // app.UseHttpsRedirection(new HttpsRedirectionOptions
-//    // {
-//    //     HttpsPort = 7206
-//    // });
-//}
->>>>>>> d569d34 (commit)
+// if (!app.Environment.IsDevelopment())
+// {
+//     app.UseHttpsRedirection();
+// }
+// else
+// {
+//     // أو استخدم هذا البديل لتحديد المنفذ صراحةً
+//     // app.UseHttpsRedirection(new HttpsRedirectionOptions
+//     // {
+//     //     HttpsPort = 7206
+//     // });
+// }
+
 
 // Map API endpoints
 app.MapAuthEndpoints();
