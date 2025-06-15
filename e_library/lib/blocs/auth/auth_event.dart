@@ -12,12 +12,14 @@ class RegisterEvent extends AuthEvent {
   final String password;
   final String firstName;
   final String lastName;
+  final bool isAdmin;
 
   RegisterEvent({
     required this.username,
     required this.password,
     required this.firstName,
     required this.lastName,
+    required this.isAdmin,
   });
 }
 

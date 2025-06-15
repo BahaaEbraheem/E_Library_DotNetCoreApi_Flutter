@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isAdmin = false;
 
   @override
   void dispose() {
@@ -36,15 +37,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('إنشاء حساب جديد'), centerTitle: true),
       body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AuthAuthenticated) {
-            Navigator.of(context).pushReplacementNamed('/home');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 8),
+                    Expanded(child: Text('تم إنشاء الحساب بنجاح')),
+                  ],
+                ),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            await Future.delayed(const Duration(seconds: 2));
+
+            if (!mounted) return; // ✅ تحقق قبل استخدام context
+
+            final goToLogin = await showDialog<bool>(
+              context: context,
+              builder:
+                  (context) => AlertDialog(
+                    title: const Text('تم التسجيل بنجاح'),
+                    content: const Text(
+                      'هل ترغب في الذهاب إلى صفحة تسجيل الدخول؟',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('لا'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('نعم'),
+                      ),
+                    ],
+                  ),
+            );
+
+            if (goToLogin == true && mounted) {
+              Navigator.of(context).pushReplacementNamed('/login');
+            }
           } else if (state is AuthError) {
+            if (!mounted) return;
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
+
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -169,6 +214,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     _register();
                   },
                 ),
+
+                CheckboxListTile(
+                  title: const Text('هل أنت مسؤول؟'),
+                  value: _isAdmin,
+                  onChanged: (value) {
+                    setState(() {
+                      _isAdmin = value ?? false;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+
                 const SizedBox(height: 24),
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
@@ -207,6 +264,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           password: _passwordController.text,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
+          isAdmin: _isAdmin,
         ),
       );
     }
