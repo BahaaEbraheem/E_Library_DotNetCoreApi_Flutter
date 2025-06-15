@@ -62,9 +62,13 @@ class ApiService {
         throw Exception(
           'خطأ في الاتصال. تأكد من تشغيل الخادم ومن اتصالك بالإنترنت. تحقق من عنوان IP وإعدادات الشبكة.',
         );
+      } else if (e.response?.statusCode == 401) {
+        throw Exception('اسم المستخدم أو كلمة المرور غير صحيحة');
       }
       debugPrint('خطأ في تسجيل الدخول: $e');
-      throw Exception('فشل تسجيل الدخول: ${e.toString()}');
+      throw Exception(
+        'فشل تسجيل الدخول: ${e.response?.data?['message'] ?? e.message}',
+      );
     } catch (e) {
       debugPrint('خطأ في تسجيل الدخول: $e');
       throw Exception('فشل تسجيل الدخول: ${e.toString()}');
@@ -90,9 +94,33 @@ class ApiService {
         },
       );
       return response.data;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw Exception(
+          'فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.',
+        );
+      } else if (e.type == DioExceptionType.badCertificate) {
+        throw Exception(
+          'مشكلة في شهادة الأمان. يرجى التحقق من إعدادات الاتصال.',
+        );
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception(
+          'خطأ في الاتصال. تأكد من تشغيل الخادم ومن اتصالك بالإنترنت. تحقق من عنوان IP وإعدادات الشبكة.',
+        );
+      } else if (e.response?.statusCode == 400) {
+        throw Exception('اسم المستخدم موجود بالفعل أو البيانات غير صالحة ');
+      } else if (e.response?.statusCode == 401) {
+        throw Exception('اسم المستخدم موجود بالفعل أو البيانات غير صالحة ');
+      }
+      debugPrint('خطأ في تسجيل : $e');
+      throw Exception(
+        'فشل التسجيل: ${e.response?.data?['message'] ?? e.message}',
+      );
     } catch (e) {
       debugPrint('Register error: $e');
-      throw Exception('Failed to register: ${e.toString()}');
+      throw Exception('فشل التسجيل:: ${e.toString()}');
     }
   }
 
