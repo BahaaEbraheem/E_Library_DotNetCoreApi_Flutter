@@ -68,6 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.password,
         event.firstName,
         event.lastName,
+        isAdmin: event.isAdmin,
       );
 
       // بعد التسجيل، قم بتسجيل الدخول تلقائ<|im_start|>

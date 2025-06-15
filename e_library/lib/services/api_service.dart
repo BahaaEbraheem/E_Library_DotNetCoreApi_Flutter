@@ -7,11 +7,10 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   final Dio _dio = Dio();
-  late String baseUrl='http://elibrary2025.somee.com/api';
+  late String baseUrl = 'http://elibrary2025.somee.com/api';
   List<String>? _possibleIps;
 
   ApiService() {
-
     // إعدادات Dio
     _dio.options.connectTimeout = const Duration(seconds: 15);
     _dio.options.receiveTimeout = const Duration(seconds: 15);
@@ -76,8 +75,9 @@ class ApiService {
     String username,
     String password,
     String firstName,
-    String lastName,
-  ) async {
+    String lastName, {
+    bool isAdmin = false,
+  }) async {
     try {
       final response = await _dio.post(
         '$baseUrl/register',
@@ -86,7 +86,7 @@ class ApiService {
           'password': password,
           'fName': firstName,
           'lName': lastName,
-          'isAdmin': false,
+          'isAdmin': isAdmin,
         },
       );
       return response.data;

@@ -57,9 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             await Future.delayed(const Duration(seconds: 2));
 
             if (!mounted) return; // ✅ تحقق قبل استخدام context
-
+            final BuildContext currentContext = context;
             final goToLogin = await showDialog<bool>(
-              context: context,
+              context: currentContext,
               builder:
                   (context) => AlertDialog(
                     title: const Text('تم التسجيل بنجاح'),
